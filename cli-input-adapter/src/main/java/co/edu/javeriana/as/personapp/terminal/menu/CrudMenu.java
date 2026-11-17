@@ -13,6 +13,7 @@ import co.edu.javeriana.as.personapp.domain.Phone;
 import co.edu.javeriana.as.personapp.domain.Profession;
 import co.edu.javeriana.as.personapp.domain.Study;
 import co.edu.javeriana.as.personapp.terminal.adapter.CrudInputAdapterCli;
+import co.edu.javeriana.as.personapp.terminal.mapper.FormatoCli;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -46,7 +47,7 @@ public class CrudMenu {
 		}
 		boolean back = false;
 		while (!back) {
-			System.out.println("\n1 GET todos  2 GET por id  3 GET conteo  4 POST  5 PUT  6 DELETE  0 Volver");
+			System.out.println("\n1 Listar  2 Buscar  3 Contar  4 Crear  5 Editar  6 Eliminar  0 Volver");
 			int operation = readInt(input, "Operacion: ");
 			try {
 				switch (operation) {
@@ -79,10 +80,10 @@ public class CrudMenu {
 
 	private void find(Scanner input, String database, int entity) throws NoExistException {
 		switch (entity) {
-		case 1: System.out.println(adapter.person(database).findOne(readInt(input, "Identificacion: "))); break;
-		case 2: System.out.println(adapter.profession(database).findOne(readInt(input, "Id profesion: "))); break;
-		case 3: System.out.println(adapter.phone(database).findOne(readText(input, "Numero: "))); break;
-		default: System.out.println(adapter.study(database).findOne(readInt(input, "Id persona: "),
+		case 1: show(adapter.person(database).findOne(readInt(input, "Identificacion: "))); break;
+		case 2: show(adapter.profession(database).findOne(readInt(input, "Id profesion: "))); break;
+		case 3: show(adapter.phone(database).findOne(readText(input, "Numero: "))); break;
+		default: show(adapter.study(database).findOne(readInt(input, "Id persona: "),
 				readInt(input, "Id profesion: ")));
 		}
 	}
@@ -98,10 +99,10 @@ public class CrudMenu {
 
 	private void create(Scanner input, String database, int entity) {
 		switch (entity) {
-		case 1: System.out.println(adapter.person(database).create(readPerson(input, null))); break;
-		case 2: System.out.println(adapter.profession(database).create(readProfession(input, null))); break;
-		case 3: System.out.println(adapter.phone(database).create(readPhone(input, null))); break;
-		default: System.out.println(adapter.study(database).create(readStudy(input, null, null)));
+		case 1: show(adapter.person(database).create(readPerson(input, null))); break;
+		case 2: show(adapter.profession(database).create(readProfession(input, null))); break;
+		case 3: show(adapter.phone(database).create(readPhone(input, null))); break;
+		default: show(adapter.study(database).create(readStudy(input, null, null)));
 		}
 	}
 
@@ -109,23 +110,23 @@ public class CrudMenu {
 		switch (entity) {
 		case 1: {
 			Integer id = readInt(input, "Identificacion a actualizar: ");
-			System.out.println(adapter.person(database).edit(id, readPerson(input, id)));
+			show(adapter.person(database).edit(id, readPerson(input, id)));
 			break;
 		}
 		case 2: {
 			Integer id = readInt(input, "Id profesion a actualizar: ");
-			System.out.println(adapter.profession(database).edit(id, readProfession(input, id)));
+			show(adapter.profession(database).edit(id, readProfession(input, id)));
 			break;
 		}
 		case 3: {
 			String number = readText(input, "Numero a actualizar: ");
-			System.out.println(adapter.phone(database).edit(number, readPhone(input, number)));
+			show(adapter.phone(database).edit(number, readPhone(input, number)));
 			break;
 		}
 		default: {
 			Integer personId = readInt(input, "Id persona: ");
 			Integer professionId = readInt(input, "Id profesion: ");
-			System.out.println(adapter.study(database).edit(personId, professionId,
+			show(adapter.study(database).edit(personId, professionId,
 					readStudy(input, personId, professionId)));
 		}
 		}
@@ -154,10 +155,10 @@ public class CrudMenu {
 				System.out.println("El genero debe ser F o M");
 			}
 		} while (!"F".equalsIgnoreCase(genderText) && !"M".equalsIgnoreCase(genderText));
-		Integer age = readInt(input, "Edad (>=0): ");
-		while (age < 0) {
+		Integer age = readOptionalInt(input, "Edad (vacio si no aplica): ");
+		while (age != null && age < 0) {
 			System.out.println("La edad no puede ser negativa");
-			age = readInt(input, "Edad (>=0): ");
+			age = readOptionalInt(input, "Edad (vacio si no aplica): ");
 		}
 		Person person = new Person(id, first, last, "F".equalsIgnoreCase(genderText) ? Gender.FEMALE : Gender.MALE);
 		person.setAge(age);
@@ -166,7 +167,9 @@ public class CrudMenu {
 
 	private Profession readProfession(Scanner input, Integer existingId) {
 		Integer id = existingId == null ? readInt(input, "Id profesion: ") : existingId;
-		return new Profession(id, readText(input, "Nombre: "), readText(input, "Descripcion: "), null);
+		String name = readText(input, "Nombre: ");
+		String description = readText(input, "Descripcion (vacio si no aplica): ");
+		return new Profession(id, name, description.isEmpty() ? null : description, null);
 	}
 
 	private Phone readPhone(Scanner input, String existingNumber) {
@@ -186,8 +189,8 @@ public class CrudMenu {
 		profession.setIdentification(professionId);
 		String dateText = readText(input, "Fecha graduacion (AAAA-MM-DD, vacio si no aplica): ");
 		LocalDate date = dateText.isEmpty() ? null : LocalDate.parse(dateText);
-		String university = readText(input, "Universidad: ");
-		return new Study(person, profession, date, university);
+		String university = readText(input, "Universidad (vacio si no aplica): ");
+		return new Study(person, profession, date, university.isEmpty() ? null : university);
 	}
 
 	private String chooseDatabase(Scanner input) {
@@ -210,6 +213,20 @@ public class CrudMenu {
 		}
 	}
 
+	private Integer readOptionalInt(Scanner input, String prompt) {
+		while (true) {
+			String value = readText(input, prompt);
+			if (value.isEmpty()) {
+				return null;
+			}
+			try {
+				return Integer.parseInt(value);
+			} catch (NumberFormatException exception) {
+				System.out.println("Ingrese un numero entero");
+			}
+		}
+	}
+
 	private String readText(Scanner input, String prompt) {
 		System.out.print(prompt);
 		return input.nextLine().trim();
@@ -219,7 +236,11 @@ public class CrudMenu {
 		if (values.isEmpty()) {
 			System.out.println("Sin registros");
 		} else {
-			values.forEach(System.out::println);
+			values.forEach(this::show);
 		}
+	}
+
+	private void show(Object value) {
+		System.out.println(FormatoCli.formatear(value));
 	}
 }
