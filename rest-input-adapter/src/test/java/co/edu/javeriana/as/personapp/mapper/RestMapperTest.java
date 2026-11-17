@@ -1,6 +1,7 @@
 package co.edu.javeriana.as.personapp.mapper;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import org.junit.jupiter.api.Test;
@@ -23,6 +24,18 @@ class RestMapperTest {
 				new PersonaRequest("2", "Juan", "Perez", "21", "m", "MONGO")).getGender());
 		assertThrows(IllegalArgumentException.class, () -> personMapper.fromAdapterToDomain(
 				new PersonaRequest("3", "Alex", "Perez", "22", "X", "MARIA")));
+	}
+
+	@Test
+	void ageIsOptionalButCannotBeNegative() {
+		assertNull(personMapper.fromAdapterToDomain(
+				new PersonaRequest("4", "Ana", "Perez", null, "F", "MARIA")).getAge());
+		assertNull(personMapper.fromAdapterToDomain(
+				new PersonaRequest("5", "Ana", "Perez", " ", "F", "MARIA")).getAge());
+		assertThrows(IllegalArgumentException.class, () -> personMapper.fromAdapterToDomain(
+				new PersonaRequest("6", "Ana", "Perez", "-3", "F", "MARIA")));
+		assertThrows(IllegalArgumentException.class, () -> personMapper.fromAdapterToDomain(
+				new PersonaRequest("abc", "Ana", "Perez", "20", "F", "MARIA")));
 	}
 
 	@Test

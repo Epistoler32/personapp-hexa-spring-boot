@@ -45,22 +45,10 @@ public class PersonaMapperMongo {
 	}
 
 	private Integer validateEdad(Integer age) {
-		if (age == null || age < 0) {
-			throw new IllegalArgumentException("Age is required and cannot be negative");
+		if (age != null && age < 0) {
+			throw new IllegalArgumentException("Age cannot be negative");
 		}
 		return age;
-	}
-
-	private List<EstudiosDocument> validateEstudios(List<Study> studies) {
-		return studies != null && !studies.isEmpty() ? studies.stream()
-				.map(study -> estudiosMapperMongo.fromDomainToAdapter(study)).collect(Collectors.toList())
-				: new ArrayList<EstudiosDocument>();
-	}
-
-	private List<TelefonoDocument> validateTelefonos(List<Phone> phoneNumbers) {
-		return phoneNumbers != null && !phoneNumbers.isEmpty() ? phoneNumbers.stream()
-				.map(phone -> telefonoMapperMongo.fromDomainToAdapter(phone)).collect(Collectors.toList())
-				: new ArrayList<TelefonoDocument>();
 	}
 
 	public Person fromAdapterToDomain(PersonaDocument personaDocument) {
@@ -96,8 +84,8 @@ public class PersonaMapperMongo {
 	}
 
 	private Integer validateAge(Integer edad) {
-		if (edad == null || edad < 0) {
-			throw new IllegalArgumentException("Stored age must be present and non-negative");
+		if (edad != null && edad < 0) {
+			throw new IllegalArgumentException("Stored age cannot be negative");
 		}
 		return edad;
 	}

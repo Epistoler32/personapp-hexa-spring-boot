@@ -41,7 +41,6 @@ public class PersonaEntity implements Serializable {
 	@Basic(optional = false)
 	@Column(nullable = false)
 	private Character genero;
-	@Column(nullable = false)
 	private Integer edad;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "duenio")
 	private List<TelefonoEntity> telefonos;

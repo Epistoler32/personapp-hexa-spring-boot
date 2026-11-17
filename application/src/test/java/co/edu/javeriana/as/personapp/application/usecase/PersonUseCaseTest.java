@@ -1,6 +1,7 @@
 package co.edu.javeriana.as.personapp.application.usecase;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
@@ -34,10 +35,10 @@ class PersonUseCaseTest {
 	}
 
 	@Test
-	void rejectsMissingOrNegativeAge() {
+	void acceptsMissingAgeButRejectsNegativeAge() {
 		PersonUseCase useCase = new PersonUseCase(new InMemoryPersonOutput());
-		assertThrows(IllegalArgumentException.class, () -> useCase.create(person(1, "Ana", null)));
-		assertThrows(IllegalArgumentException.class, () -> useCase.create(person(1, "Ana", -1)));
+		assertNull(useCase.create(person(1, "Ana", null)).getAge());
+		assertThrows(IllegalArgumentException.class, () -> useCase.create(person(2, "Ana", -1)));
 	}
 
 	@Test

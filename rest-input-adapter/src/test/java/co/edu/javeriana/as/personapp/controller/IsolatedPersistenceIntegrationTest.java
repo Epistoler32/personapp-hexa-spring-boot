@@ -103,9 +103,6 @@ class IsolatedPersistenceIntegrationTest {
 				mvc.perform(post("/api/v1/persona").contentType(MediaType.APPLICATION_JSON)
 						.content(person.replace("\"31\"", "\"-1\"").replace("\"" + id + "\"", "\"" + (id + 1) + "\"")))
 						.andExpect(status().isBadRequest());
-				mvc.perform(post("/api/v1/persona").contentType(MediaType.APPLICATION_JSON)
-						.content(person.replace("\"31\"", "null")))
-						.andExpect(status().isBadRequest());
 			} finally {
 				for (int i = created - 1; i >= 0; i--) {
 					mvc.perform(delete(paths[i])).andExpect(status().isOk());

@@ -84,8 +84,8 @@ public class PersonUseCase implements PersonInputPort {
 		if (person == null || person.getIdentification() == null || person.getFirstName() == null
 				|| person.getFirstName().trim().isEmpty() || person.getLastName() == null
 				|| person.getLastName().trim().isEmpty() || person.getGender() == null
-				|| person.getAge() == null || person.getAge() < 0) {
-			throw new IllegalArgumentException("Person requires id, names, F/M gender, and a non-negative age");
+				|| !person.isValidAge()) {
+			throw new IllegalArgumentException("Person requires id, names and F/M gender; age cannot be negative");
 		}
 	}
 

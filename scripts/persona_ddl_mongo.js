@@ -23,13 +23,13 @@ var result = personaDatabase.runCommand({
   validator: {
     $jsonSchema: {
       bsonType: "object",
-      required: ["_id", "nombre", "apellido", "genero", "edad"],
+      required: ["_id", "nombre", "apellido", "genero"],
       properties: {
         _id: { bsonType: "int" },
         nombre: { bsonType: "string" },
         apellido: { bsonType: "string" },
         genero: { enum: ["F", "M"] },
-        edad: { bsonType: "int", minimum: 0 }
+        edad: { bsonType: ["int", "null"], minimum: 0 }
       }
     }
   },
