@@ -22,25 +22,15 @@ public class ProfesionMapperMongo {
 		ProfesionDocument profesionDocument = new ProfesionDocument();
 		profesionDocument.setId(profession.getIdentification());
 		profesionDocument.setNom(profession.getName());
-		profesionDocument.setDes(validateDes(profession.getDescription()));
+		profesionDocument.setDes(profession.getDescription());
 		return profesionDocument;
-	}
-
-	private String validateDes(String description) {
-		return description != null ? description : "";
-	}
-
-	private List<EstudiosDocument> validateEstudios(List<Study> studies) {
-		return studies != null && !studies.isEmpty() ? studies.stream()
-				.map(study -> estudiosMapperMongo.fromDomainToAdapter(study)).collect(Collectors.toList())
-				: new ArrayList<EstudiosDocument>();
 	}
 
 	public Profession fromAdapterToDomain(ProfesionDocument profesionDocument) {
 		Profession profession = new Profession();
 		profession.setIdentification(profesionDocument.getId());
 		profession.setName(profesionDocument.getNom());
-		profession.setDescription(validateDescription(profesionDocument.getDes()));
+		profession.setDescription(profesionDocument.getDes());
 		profession.setStudies(validateStudies(profesionDocument.getEstudios()));
 		return profession;
 	}
@@ -49,12 +39,8 @@ public class ProfesionMapperMongo {
 		Profession profession = new Profession();
 		profession.setIdentification(profesionDocument.getId());
 		profession.setName(profesionDocument.getNom());
-		profession.setDescription(validateDescription(profesionDocument.getDes()));
+		profession.setDescription(profesionDocument.getDes());
 		return profession;
-	}
-
-	private String validateDescription(String des) {
-		return des != null ? des : "";
 	}
 
 	private List<Study> validateStudies(List<EstudiosDocument> estudiosDocument) {

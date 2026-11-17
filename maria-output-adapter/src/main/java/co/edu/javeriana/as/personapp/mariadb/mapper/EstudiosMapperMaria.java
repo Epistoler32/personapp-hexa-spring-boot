@@ -29,7 +29,7 @@ public class EstudiosMapperMaria {
 		estudio.setPersona(new co.edu.javeriana.as.personapp.mariadb.entity.PersonaEntity(study.getPerson().getIdentification()));
 		estudio.setProfesion(new co.edu.javeriana.as.personapp.mariadb.entity.ProfesionEntity(study.getProfession().getIdentification()));
 		estudio.setFecha(validateFecha(study.getGraduationDate()));
-		estudio.setUniver(validateUniver(study.getUniversityName()));
+		estudio.setUniver(study.getUniversityName());
 		return estudio;
 	}
 
@@ -39,16 +39,12 @@ public class EstudiosMapperMaria {
 				: null;
 	}
 
-	private String validateUniver(String universityName) {
-		return universityName != null ? universityName : "";
-	}
-
 	public Study fromAdapterToDomain(EstudiosEntity estudiosEntity) {
 		Study study = new Study();
 		study.setPerson(personaMapperMaria.fromAdapterToDomainReference(estudiosEntity.getPersona()));
 		study.setProfession(profesionMapperMaria.fromAdapterToDomainReference(estudiosEntity.getProfesion()));
 		study.setGraduationDate(validateGraduationDate(estudiosEntity.getFecha()));
-		study.setUniversityName(validateUniversityName(estudiosEntity.getUniver()));
+		study.setUniversityName(estudiosEntity.getUniver());
 		return study;
 	}
 
@@ -60,9 +56,5 @@ public class EstudiosMapperMaria {
 			return ((java.sql.Date) fecha).toLocalDate();
 		}
 		return fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-	}
-
-	private String validateUniversityName(String univer) {
-		return univer != null ? univer : "";
 	}
 }
