@@ -2,6 +2,7 @@ package co.edu.javeriana.as.personapp.mongo.adapter;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -131,5 +132,22 @@ class RelatedOutputAdaptersMongoTest {
 		assertThrows(IllegalArgumentException.class,
 				() -> studyAdapter.save(new Study(person, profession, null, "University")));
 		verify(studies, never()).save(any());
+	}
+
+	@Test
+	void deletesPersonTogetherWithItsPhonesAndStudies() {
+		PersonaRepositoryMongo people = mock(PersonaRepositoryMongo.class);
+		TelefonoRepositoryMongo phones = mock(TelefonoRepositoryMongo.class);
+		EstudiosRepositoryMongo studies = mock(EstudiosRepositoryMongo.class);
+		PersonOutputAdapterMongo adapter = new PersonOutputAdapterMongo();
+		setField(adapter, "personaRepositoryMongo", people);
+		setField(adapter, "telefonoRepositoryMongo", phones);
+		setField(adapter, "estudiosRepositoryMongo", studies);
+		when(people.findById(1)).thenReturn(Optional.empty());
+
+		assertTrue(adapter.delete(1));
+		verify(phones).deleteByDuenio(1);
+		verify(studies).deleteByPersona(1);
+		verify(people).deleteById(1);
 	}
 }

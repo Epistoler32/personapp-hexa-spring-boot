@@ -12,8 +12,6 @@ import co.edu.javeriana.as.personapp.common.annotations.Adapter;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.mongo.document.PersonaDocument;
 import co.edu.javeriana.as.personapp.mongo.mapper.PersonaMapperMongo;
-import co.edu.javeriana.as.personapp.mongo.document.TelefonoDocument;
-import co.edu.javeriana.as.personapp.mongo.document.EstudiosDocument;
 import co.edu.javeriana.as.personapp.mongo.repository.PersonaRepositoryMongo;
 import co.edu.javeriana.as.personapp.mongo.repository.TelefonoRepositoryMongo;
 import co.edu.javeriana.as.personapp.mongo.repository.EstudiosRepositoryMongo;
@@ -50,18 +48,8 @@ public class PersonOutputAdapterMongo implements PersonOutputPort {
 	@Override
 	public Boolean delete(Integer identification) {
 		log.debug("Into delete on Adapter MongoDB");
-		for (TelefonoDocument phone : telefonoRepositoryMongo.findAll()) {
-			if (phone.getPrimaryDuenio() != null
-					&& identification.equals(phone.getPrimaryDuenio().getId())) {
-				telefonoRepositoryMongo.delete(phone);
-			}
-		}
-		for (EstudiosDocument study : estudiosRepositoryMongo.findAll()) {
-			if (study.getPrimaryPersona() != null
-					&& identification.equals(study.getPrimaryPersona().getId())) {
-				estudiosRepositoryMongo.delete(study);
-			}
-		}
+		telefonoRepositoryMongo.deleteByDuenio(identification);
+		estudiosRepositoryMongo.deleteByPersona(identification);
 		personaRepositoryMongo.deleteById(identification);
 		return personaRepositoryMongo.findById(identification).isEmpty();
 	}

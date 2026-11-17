@@ -8,7 +8,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import co.edu.javeriana.as.personapp.application.port.out.ProfessionOutputPort;
 import co.edu.javeriana.as.personapp.common.annotations.Adapter;
 import co.edu.javeriana.as.personapp.domain.Profession;
-import co.edu.javeriana.as.personapp.mongo.document.EstudiosDocument;
 import co.edu.javeriana.as.personapp.mongo.mapper.ProfesionMapperMongo;
 import co.edu.javeriana.as.personapp.mongo.repository.EstudiosRepositoryMongo;
 import co.edu.javeriana.as.personapp.mongo.repository.ProfesionRepositoryMongo;
@@ -26,12 +25,7 @@ public class ProfessionOutputAdapterMongo implements ProfessionOutputPort {
 
 	@Override
 	public Boolean delete(Integer identification) {
-		for (EstudiosDocument study : studyRepository.findAll()) {
-			if (study.getPrimaryProfesion() != null
-					&& identification.equals(study.getPrimaryProfesion().getId())) {
-				studyRepository.delete(study);
-			}
-		}
+		studyRepository.deleteByProfesion(identification);
 		repository.deleteById(identification);
 		return !repository.existsById(identification);
 	}
