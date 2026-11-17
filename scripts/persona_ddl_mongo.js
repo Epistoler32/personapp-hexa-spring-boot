@@ -1,4 +1,4 @@
-use admin
+db = db.getSiblingDB("admin");
 
 if (db.getUser("persona_db") == null) {
   db.createUser({
