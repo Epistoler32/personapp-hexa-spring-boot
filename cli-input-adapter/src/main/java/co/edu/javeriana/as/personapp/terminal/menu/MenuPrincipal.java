@@ -16,6 +16,8 @@ public class MenuPrincipal {
 	//Beans
 	@Autowired
 	private PersonaInputAdapterCli personaInputAdapterCli;
+	@Autowired
+	private CrudMenu crudMenu;
 
 	private static final int SALIR = 0;
 	private static final int MODULO_PERSONA = 1;
@@ -33,34 +35,7 @@ public class MenuPrincipal {
     }
 
 	public void inicio() {
-		
-		//personaMenu = new PersonaMenu(personaInputAdapterCli);
-		boolean isValid = false;
-		do {
-			mostrarMenu();
-			int opcion = leerOpcion();
-			switch (opcion) {
-			case SALIR:
-				isValid = true;
-				break;
-			case MODULO_PERSONA:
-				personaMenu.iniciarMenu(personaInputAdapterCli, keyboard);
-				log.info("volvio");
-				break;
-			case MODULO_PROFESION:
-				log.warn("Implementar Menu");
-				break;
-			case MODULO_TELEFONO:
-				log.warn("Implementar Menu");
-				break;
-			case MODULO_ESTUDIO:
-				log.warn("Implementar Menu");
-				break;
-			default:
-				log.warn("La opción elegida no es válida.");
-			}
-
-		} while (!isValid);
+		crudMenu.start(keyboard);
 		keyboard.close();
 	}
 

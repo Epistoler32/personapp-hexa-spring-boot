@@ -32,17 +32,23 @@ public class PersonaMapperMongo {
 		personaDocument.setApellido(person.getLastName());
 		personaDocument.setGenero(validateGenero(person.getGender()));
 		personaDocument.setEdad(validateEdad(person.getAge()));
-		personaDocument.setEstudios(validateEstudios(person.getStudies()));
-		personaDocument.setTelefonos(validateTelefonos(person.getPhoneNumbers()));
 		return personaDocument;
 	}
 
 	private String validateGenero(@NonNull Gender gender) {
-		return gender == Gender.FEMALE ? "F" : gender == Gender.MALE ? "M" : " ";
+		return gender == Gender.FEMALE ? "F" : gender == Gender.MALE ? "M"
+				: invalidGender();
+	}
+
+	private String invalidGender() {
+		throw new IllegalArgumentException("Gender must be FEMALE or MALE");
 	}
 
 	private Integer validateEdad(Integer age) {
-		return age != null && age >= 0 ? age : null;
+		if (age == null || age < 0) {
+			throw new IllegalArgumentException("Age is required and cannot be negative");
+		}
+		return age;
 	}
 
 	private List<EstudiosDocument> validateEstudios(List<Study> studies) {
@@ -69,12 +75,31 @@ public class PersonaMapperMongo {
 		return person;
 	}
 
+	public Person fromAdapterToDomainReference(PersonaDocument personaDocument) {
+		Person person = new Person();
+		person.setIdentification(personaDocument.getId());
+		person.setFirstName(personaDocument.getNombre());
+		person.setLastName(personaDocument.getApellido());
+		person.setGender(validateGender(personaDocument.getGenero()));
+		person.setAge(validateAge(personaDocument.getEdad()));
+		return person;
+	}
+
 	private @NonNull Gender validateGender(String genero) {
-		return "F".equals(genero) ? Gender.FEMALE : "M".equals(genero) ? Gender.MALE : Gender.OTHER;
+		if ("F".equals(genero)) {
+			return Gender.FEMALE;
+		}
+		if ("M".equals(genero)) {
+			return Gender.MALE;
+		}
+		throw new IllegalArgumentException("Gender must be F or M");
 	}
 
 	private Integer validateAge(Integer edad) {
-		return edad != null && edad >= 0 ? edad : null;
+		if (edad == null || edad < 0) {
+			throw new IllegalArgumentException("Stored age must be present and non-negative");
+		}
+		return edad;
 	}
 
 	private List<Study> validateStudies(List<EstudiosDocument> estudiosDocuments) {

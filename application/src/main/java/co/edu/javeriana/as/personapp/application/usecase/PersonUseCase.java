@@ -8,6 +8,7 @@ import co.edu.javeriana.as.personapp.application.port.in.PersonInputPort;
 import co.edu.javeriana.as.personapp.application.port.out.PersonOutputPort;
 import co.edu.javeriana.as.personapp.common.annotations.UseCase;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
+import co.edu.javeriana.as.personapp.common.exceptions.AlreadyExistsException;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
 import co.edu.javeriana.as.personapp.domain.Study;
@@ -32,14 +33,21 @@ public class PersonUseCase implements PersonInputPort {
 	@Override
 	public Person create(Person person) {
 		log.debug("Into create on Application Domain");
+		validatePerson(person);
+		if (personPersintence.findById(person.getIdentification()) != null) {
+			throw new AlreadyExistsException("Person " + person.getIdentification() + " already exists");
+		}
 		return personPersintence.save(person);
 	}
 
 	@Override
 	public Person edit(Integer identification, Person person) throws NoExistException {
 		Person oldPerson = personPersintence.findById(identification);
-		if (oldPerson != null)
+		if (oldPerson != null) {
+			validatePerson(person);
+			person.setIdentification(identification);
 			return personPersintence.save(person);
+		}
 		throw new NoExistException(
 				"The person with id " + identification + " does not exist into db, cannot be edited");
 	}
@@ -69,7 +77,16 @@ public class PersonUseCase implements PersonInputPort {
 
 	@Override
 	public Integer count() {
-		return findAll().size();
+		return personPersintence.count();
+	}
+
+	private void validatePerson(Person person) {
+		if (person == null || person.getIdentification() == null || person.getFirstName() == null
+				|| person.getFirstName().trim().isEmpty() || person.getLastName() == null
+				|| person.getLastName().trim().isEmpty() || person.getGender() == null
+				|| person.getAge() == null || person.getAge() < 0) {
+			throw new IllegalArgumentException("Person requires id, names, F/M gender, and a non-negative age");
+		}
 	}
 
 	@Override

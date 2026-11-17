@@ -37,11 +37,15 @@ public class EstudiosMapperMongo {
 	}
 
 	private PersonaDocument validatePrimaryPersona(@NonNull Person person) {
-		return person != null ? personaMapperMongo.fromDomainToAdapter(person) : new PersonaDocument();
+		PersonaDocument reference = new PersonaDocument();
+		reference.setId(person.getIdentification());
+		return reference;
 	}
 
 	private ProfesionDocument validatePrimaryProfesion(@NonNull Profession profession) {
-		return profession != null ? profesionMapperMongo.fromDomainToAdapter(profession) : new ProfesionDocument();
+		ProfesionDocument reference = new ProfesionDocument();
+		reference.setId(profession.getIdentification());
+		return reference;
 	}
 
 	private LocalDate validateFecha(LocalDate graduationDate) {
@@ -54,11 +58,11 @@ public class EstudiosMapperMongo {
 
 	public Study fromAdapterToDomain(EstudiosDocument estudiosDocument) {
 		Study study = new Study();
-		study.setPerson(personaMapperMongo.fromAdapterToDomain(estudiosDocument.getPrimaryPersona()));
-		study.setProfession(profesionMapperMongo.fromAdapterToDomain(estudiosDocument.getPrimaryProfesion()));
+		study.setPerson(personaMapperMongo.fromAdapterToDomainReference(estudiosDocument.getPrimaryPersona()));
+		study.setProfession(profesionMapperMongo.fromAdapterToDomainReference(estudiosDocument.getPrimaryProfesion()));
 		study.setGraduationDate(validateGraduationDate(estudiosDocument.getFecha()));
 		study.setUniversityName(validateUniversityName(estudiosDocument.getUniver()));
-		return null;
+		return study;
 	}
 
 	private LocalDate validateGraduationDate(LocalDate fecha) {

@@ -23,7 +23,6 @@ public class ProfesionMapperMaria {
 		profesionEntity.setId(profession.getIdentification());
 		profesionEntity.setNom(profession.getName());
 		profesionEntity.setDes(validateDes(profession.getDescription()));
-		profesionEntity.setEstudios(validateEstudios(profession.getStudies()));
 		return profesionEntity;
 	}
 
@@ -43,6 +42,14 @@ public class ProfesionMapperMaria {
 		profession.setName(profesionEntity.getNom());
 		profession.setDescription(validateDescription(profesionEntity.getDes()));
 		profession.setStudies(validateStudies(profesionEntity.getEstudios()));
+		return profession;
+	}
+
+	public Profession fromAdapterToDomainReference(ProfesionEntity profesionEntity) {
+		Profession profession = new Profession();
+		profession.setIdentification(profesionEntity.getId());
+		profession.setName(profesionEntity.getNom());
+		profession.setDescription(validateDescription(profesionEntity.getDes()));
 		return profession;
 	}
 

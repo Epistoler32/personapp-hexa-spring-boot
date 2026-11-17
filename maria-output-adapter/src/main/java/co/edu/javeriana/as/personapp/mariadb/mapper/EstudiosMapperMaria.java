@@ -26,6 +26,8 @@ public class EstudiosMapperMaria {
 		estudioPK.setIdProf(study.getProfession().getIdentification());
 		EstudiosEntity estudio = new EstudiosEntity();
 		estudio.setEstudiosPK(estudioPK);
+		estudio.setPersona(new co.edu.javeriana.as.personapp.mariadb.entity.PersonaEntity(study.getPerson().getIdentification()));
+		estudio.setProfesion(new co.edu.javeriana.as.personapp.mariadb.entity.ProfesionEntity(study.getProfession().getIdentification()));
 		estudio.setFecha(validateFecha(study.getGraduationDate()));
 		estudio.setUniver(validateUniver(study.getUniversityName()));
 		return estudio;
@@ -43,15 +45,21 @@ public class EstudiosMapperMaria {
 
 	public Study fromAdapterToDomain(EstudiosEntity estudiosEntity) {
 		Study study = new Study();
-		study.setPerson(personaMapperMaria.fromAdapterToDomain(estudiosEntity.getPersona()));
-		study.setProfession(profesionMapperMaria.fromAdapterToDomain(estudiosEntity.getProfesion()));
+		study.setPerson(personaMapperMaria.fromAdapterToDomainReference(estudiosEntity.getPersona()));
+		study.setProfession(profesionMapperMaria.fromAdapterToDomainReference(estudiosEntity.getProfesion()));
 		study.setGraduationDate(validateGraduationDate(estudiosEntity.getFecha()));
 		study.setUniversityName(validateUniversityName(estudiosEntity.getUniver()));
-		return null;
+		return study;
 	}
 
 	private LocalDate validateGraduationDate(Date fecha) {
-		return fecha != null ? fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate() : null;
+		if (fecha == null) {
+			return null;
+		}
+		if (fecha instanceof java.sql.Date) {
+			return ((java.sql.Date) fecha).toLocalDate();
+		}
+		return fecha.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 	}
 
 	private String validateUniversityName(String univer) {

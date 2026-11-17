@@ -3,15 +3,15 @@ package co.edu.javeriana.as.personapp.mariadb.entity;
 import java.io.Serializable;
 import java.util.List;
 
-import javax.persistence.Basic;
-import javax.persistence.CascadeType;
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import javax.persistence.NamedQueries;
-import javax.persistence.NamedQuery;
+import jakarta.persistence.Basic;
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
+import jakarta.persistence.Table;
+import jakarta.persistence.NamedQueries;
+import jakarta.persistence.NamedQuery;
 
 /**
  *
@@ -41,6 +41,7 @@ public class PersonaEntity implements Serializable {
 	@Basic(optional = false)
 	@Column(nullable = false)
 	private Character genero;
+	@Column(nullable = false)
 	private Integer edad;
 	@OneToMany(cascade = CascadeType.ALL, mappedBy = "duenio")
 	private List<TelefonoEntity> telefonos;

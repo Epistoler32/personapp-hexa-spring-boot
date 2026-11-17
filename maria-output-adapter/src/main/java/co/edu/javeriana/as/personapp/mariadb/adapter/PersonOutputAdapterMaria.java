@@ -4,7 +4,7 @@ import java.util.List;
 
 import java.util.stream.Collectors;
 
-import javax.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -30,7 +30,14 @@ public class PersonOutputAdapterMaria implements PersonOutputPort {
 	@Override
 	public Person save(Person person) {
 		log.debug("Into save on Adapter MariaDB");
-		PersonaEntity persistedPersona = personaRepositoryMaria.save(personaMapperMaria.fromDomainToAdapter(person));
+		PersonaEntity mappedPersona = personaMapperMaria.fromDomainToAdapter(person);
+		PersonaEntity persistedPersona = personaRepositoryMaria.findById(person.getIdentification()).orElseGet(PersonaEntity::new);
+		persistedPersona.setCc(mappedPersona.getCc());
+		persistedPersona.setNombre(mappedPersona.getNombre());
+		persistedPersona.setApellido(mappedPersona.getApellido());
+		persistedPersona.setGenero(mappedPersona.getGenero());
+		persistedPersona.setEdad(mappedPersona.getEdad());
+		persistedPersona = personaRepositoryMaria.save(persistedPersona);
 		return personaMapperMaria.fromAdapterToDomain(persistedPersona);
 	}
 
@@ -51,11 +58,14 @@ public class PersonOutputAdapterMaria implements PersonOutputPort {
 	@Override
 	public Person findById(Integer identification) {
 		log.debug("Into findById on Adapter MariaDB");
-		if (personaRepositoryMaria.findById(identification).isEmpty()) {
-			return null;
-		} else {
-			return personaMapperMaria.fromAdapterToDomain(personaRepositoryMaria.findById(identification).get());
-		}
+		return personaRepositoryMaria.findById(identification)
+				.map(personaMapperMaria::fromAdapterToDomain)
+				.orElse(null);
+	}
+
+	@Override
+	public Integer count() {
+		return Math.toIntExact(personaRepositoryMaria.count());
 	}
 
 }

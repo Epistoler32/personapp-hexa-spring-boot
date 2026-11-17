@@ -32,17 +32,22 @@ public class PersonaMapperMaria {
 		personaEntity.setApellido(person.getLastName());
 		personaEntity.setGenero(validateGenero(person.getGender()));
 		personaEntity.setEdad(validateEdad(person.getAge()));
-		personaEntity.setEstudios(validateEstudios(person.getStudies()));
-		personaEntity.setTelefonos(validateTelefonos(person.getPhoneNumbers()));
 		return personaEntity;
 	}
 
 	private Character validateGenero(@NonNull Gender gender) {
-		return gender == Gender.FEMALE ? 'F' : gender == Gender.MALE ? 'M' : ' ';
+		return gender == Gender.FEMALE ? 'F' : gender == Gender.MALE ? 'M' : invalidGender();
+	}
+
+	private Character invalidGender() {
+		throw new IllegalArgumentException("Gender must be FEMALE or MALE");
 	}
 
 	private Integer validateEdad(Integer age) {
-		return age != null && age >= 0 ? age : null;
+		if (age == null || age < 0) {
+			throw new IllegalArgumentException("Age is required and cannot be negative");
+		}
+		return age;
 	}
 
 	private List<EstudiosEntity> validateEstudios(List<Study> studies) {
@@ -69,12 +74,33 @@ public class PersonaMapperMaria {
 		return person;
 	}
 
+	public Person fromAdapterToDomainReference(PersonaEntity personaEntity) {
+		Person person = new Person();
+		person.setIdentification(personaEntity.getCc());
+		person.setFirstName(personaEntity.getNombre());
+		person.setLastName(personaEntity.getApellido());
+		person.setGender(validateGender(personaEntity.getGenero()));
+		person.setAge(validateAge(personaEntity.getEdad()));
+		return person;
+	}
+
 	private @NonNull Gender validateGender(Character genero) {
-		return genero == 'F' ? Gender.FEMALE : genero == 'M' ? Gender.MALE : Gender.OTHER;
+		if (genero == null) {
+			throw new IllegalArgumentException("Gender cannot be null");
+		}
+		return genero == 'F' ? Gender.FEMALE : genero == 'M' ? Gender.MALE
+				: invalidDomainGender();
+	}
+
+	private Gender invalidDomainGender() {
+		throw new IllegalArgumentException("Gender must be F or M");
 	}
 
 	private Integer validateAge(Integer edad) {
-		return edad != null && edad >= 0 ? edad : null;
+		if (edad == null || edad < 0) {
+			throw new IllegalArgumentException("Stored age must be present and non-negative");
+		}
+		return edad;
 	}
 
 	private List<Study> validateStudies(List<EstudiosEntity> estudiosEntity) {

@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>co.edu.javeriana.as</groupId>
 		<artifactId>personapp-hexa-spring-boot</artifactId>
-		<version>${revision}</version>
+		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<groupId>co.edu.javeriana.as.personapp</groupId>
 	<artifactId>rest-input-adapter</artifactId>
@@ -34,8 +34,8 @@
 		</dependency>
 		<dependency>
 			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-ui</artifactId>
-			<version>1.7.0</version>
+			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
+			<version>3.2.0</version>
 		</dependency>
 	</dependencies>
 	<build>

@@ -12,7 +12,11 @@ import co.edu.javeriana.as.personapp.common.annotations.Adapter;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.mongo.document.PersonaDocument;
 import co.edu.javeriana.as.personapp.mongo.mapper.PersonaMapperMongo;
+import co.edu.javeriana.as.personapp.mongo.document.TelefonoDocument;
+import co.edu.javeriana.as.personapp.mongo.document.EstudiosDocument;
 import co.edu.javeriana.as.personapp.mongo.repository.PersonaRepositoryMongo;
+import co.edu.javeriana.as.personapp.mongo.repository.TelefonoRepositoryMongo;
+import co.edu.javeriana.as.personapp.mongo.repository.EstudiosRepositoryMongo;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -21,6 +25,12 @@ public class PersonOutputAdapterMongo implements PersonOutputPort {
 	
 	@Autowired
     private PersonaRepositoryMongo personaRepositoryMongo;
+
+    @Autowired
+    private TelefonoRepositoryMongo telefonoRepositoryMongo;
+
+    @Autowired
+    private EstudiosRepositoryMongo estudiosRepositoryMongo;
 	
 	@Autowired
 	private PersonaMapperMongo personaMapperMongo;
@@ -33,13 +43,25 @@ public class PersonOutputAdapterMongo implements PersonOutputPort {
 			return personaMapperMongo.fromAdapterToDomain(persistedPersona);
 		} catch (MongoWriteException e) {
 			log.warn(e.getMessage());
-			return person;
+			throw e;
 		}		
 	}
 
 	@Override
 	public Boolean delete(Integer identification) {
 		log.debug("Into delete on Adapter MongoDB");
+		for (TelefonoDocument phone : telefonoRepositoryMongo.findAll()) {
+			if (phone.getPrimaryDuenio() != null
+					&& identification.equals(phone.getPrimaryDuenio().getId())) {
+				telefonoRepositoryMongo.delete(phone);
+			}
+		}
+		for (EstudiosDocument study : estudiosRepositoryMongo.findAll()) {
+			if (study.getPrimaryPersona() != null
+					&& identification.equals(study.getPrimaryPersona().getId())) {
+				estudiosRepositoryMongo.delete(study);
+			}
+		}
 		personaRepositoryMongo.deleteById(identification);
 		return personaRepositoryMongo.findById(identification).isEmpty();
 	}
@@ -54,11 +76,14 @@ public class PersonOutputAdapterMongo implements PersonOutputPort {
 	@Override
 	public Person findById(Integer identification) {
 		log.debug("Into findById on Adapter MongoDB");
-		if (personaRepositoryMongo.findById(identification).isEmpty()) {
-			return null;
-		} else {
-			return personaMapperMongo.fromAdapterToDomain(personaRepositoryMongo.findById(identification).get());
-		}
+		return personaRepositoryMongo.findById(identification)
+				.map(personaMapperMongo::fromAdapterToDomain)
+				.orElse(null);
+	}
+
+	@Override
+	public Integer count() {
+		return Math.toIntExact(personaRepositoryMongo.count());
 	}
 
 }

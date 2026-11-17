@@ -5,18 +5,21 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.javeriana.as.personapp.adapter.PersonaInputAdapterRest;
-import co.edu.javeriana.as.personapp.common.exceptions.InvalidOptionException;
+import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
 import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
 import lombok.extern.slf4j.Slf4j;
+import io.swagger.v3.oas.annotations.Operation;
 
 @Slf4j
 @RestController
@@ -28,15 +31,44 @@ public class PersonaControllerV1 {
 	
 	@ResponseBody
 	@GetMapping(path = "/{database}", produces = MediaType.APPLICATION_JSON_VALUE)
-	public List<PersonaResponse> personas(@PathVariable String database) {
+	@Operation(summary = "List persons from the selected database")
+	public List<PersonaResponse> personas(@PathVariable("database") String database) {
 		log.info("Into personas REST API");
-			return personaInputAdapterRest.historial(database.toUpperCase());
+		return personaInputAdapterRest.historial(database);
+	}
+
+	@GetMapping(path = "/{database}/count", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Count persons in the selected database")
+	public Integer contar(@PathVariable("database") String database) {
+		return personaInputAdapterRest.contarPersonas(database);
+	}
+
+	@GetMapping(path = "/{database}/{identification}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Find a person by identification")
+	public PersonaResponse buscar(@PathVariable("database") String database, @PathVariable("identification") Integer identification)
+			throws NoExistException {
+		return personaInputAdapterRest.buscarPersona(database, identification);
 	}
 	
 	@ResponseBody
 	@PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Create a person in the selected database")
 	public PersonaResponse crearPersona(@RequestBody PersonaRequest request) {
-		log.info("esta en el metodo crearTarea en el controller del api");
 		return personaInputAdapterRest.crearPersona(request);
+	}
+
+	@PutMapping(path = "/{database}/{identification}", produces = MediaType.APPLICATION_JSON_VALUE,
+			consumes = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Update a person")
+	public PersonaResponse editar(@PathVariable("database") String database, @PathVariable("identification") Integer identification,
+			@RequestBody PersonaRequest request) throws NoExistException {
+		return personaInputAdapterRest.editarPersona(database, identification, request);
+	}
+
+	@DeleteMapping(path = "/{database}/{identification}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Delete a person")
+	public Boolean eliminar(@PathVariable("database") String database, @PathVariable("identification") Integer identification)
+			throws NoExistException {
+		return personaInputAdapterRest.eliminarPersona(database, identification);
 	}
 }
