@@ -3,6 +3,7 @@ package co.edu.javeriana.as.personapp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,12 +13,15 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import co.edu.javeriana.as.personapp.adapter.PersonaInputAdapterRest;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
+import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
 import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
+import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -49,8 +53,23 @@ public class PersonaControllerV1 {
 			throws NoExistException {
 		return personaInputAdapterRest.buscarPersona(database, identification);
 	}
+
+	@GetMapping(path = "/{database}/{identification}/telefonos", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "List the phones of a person")
+	public List<TelefonoResponse> telefonos(@PathVariable("database") String database,
+			@PathVariable("identification") Integer identification) throws NoExistException {
+		return personaInputAdapterRest.telefonosPersona(database, identification);
+	}
+
+	@GetMapping(path = "/{database}/{identification}/estudios", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "List the studies of a person")
+	public List<EstudioResponse> estudios(@PathVariable("database") String database,
+			@PathVariable("identification") Integer identification) throws NoExistException {
+		return personaInputAdapterRest.estudiosPersona(database, identification);
+	}
 	
 	@ResponseBody
+	@ResponseStatus(HttpStatus.CREATED)
 	@PostMapping(path = "", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
 	@Operation(summary = "Create a person in the selected database")
 	public PersonaResponse crearPersona(@RequestBody PersonaRequest request) {

@@ -82,7 +82,7 @@ class IsolatedPersistenceIntegrationTest {
 			try {
 				for (int i = 0; i < resources.length; i++) {
 					mvc.perform(post("/api/v1/" + resources[i]).contentType(MediaType.APPLICATION_JSON)
-							.content(bodies[i])).andExpect(status().isOk());
+							.content(bodies[i])).andExpect(status().isCreated());
 					created++;
 					mvc.perform(get(paths[i])).andExpect(status().isOk());
 				}

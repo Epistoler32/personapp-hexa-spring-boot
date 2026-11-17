@@ -57,7 +57,7 @@ class RelatedControllersV1Test {
 		professionMvc.perform(get("/api/v1/profesion/MARIA/count")).andExpect(status().isOk());
 		professionMvc.perform(get("/api/v1/profesion/MARIA/7")).andExpect(status().isOk());
 		professionMvc.perform(post("/api/v1/profesion").contentType("application/json")
-				.content("{\"id\":7,\"name\":\"Engineer\",\"database\":\"MARIA\"}")).andExpect(status().isOk());
+				.content("{\"id\":7,\"name\":\"Engineer\",\"database\":\"MARIA\"}")).andExpect(status().isCreated());
 		professionMvc.perform(put("/api/v1/profesion/MARIA/7").contentType("application/json")
 				.content("{\"name\":\"Engineer\"}")).andExpect(status().isOk());
 		professionMvc.perform(delete("/api/v1/profesion/MARIA/7")).andExpect(status().isOk());
@@ -77,7 +77,7 @@ class RelatedControllersV1Test {
 		phoneMvc.perform(get("/api/v1/telefono/MONGO/555")).andExpect(status().isOk());
 		phoneMvc.perform(post("/api/v1/telefono").contentType("application/json")
 				.content("{\"number\":\"555\",\"company\":\"Telco\",\"ownerIdentification\":1,\"database\":\"MONGO\"}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 		phoneMvc.perform(put("/api/v1/telefono/MONGO/555").contentType("application/json")
 				.content("{\"company\":\"Telco\",\"ownerIdentification\":1}")).andExpect(status().isOk());
 		phoneMvc.perform(delete("/api/v1/telefono/MONGO/555")).andExpect(status().isOk());
@@ -97,7 +97,7 @@ class RelatedControllersV1Test {
 		studyMvc.perform(get("/api/v1/estudio/MARIA/1/7")).andExpect(status().isOk());
 		studyMvc.perform(post("/api/v1/estudio").contentType("application/json")
 				.content("{\"personIdentification\":1,\"professionIdentification\":7,\"universityName\":\"Uni\",\"database\":\"MARIA\"}"))
-				.andExpect(status().isOk());
+				.andExpect(status().isCreated());
 		studyMvc.perform(put("/api/v1/estudio/MARIA/1/7").contentType("application/json")
 				.content("{\"universityName\":\"Uni\"}")).andExpect(status().isOk());
 		studyMvc.perform(delete("/api/v1/estudio/MARIA/1/7")).andExpect(status().isOk());
