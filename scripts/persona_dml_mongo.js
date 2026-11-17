@@ -6,6 +6,7 @@ db.persona.insertMany([
 		"nombre": "Pepe",
 		"apellido": "Perez",
 		"genero": "M",
+		"edad": NumberInt(30),
 		"_class": "co.edu.javeriana.as.personapp.mongo.document.PersonaDocument"
 	},
 	{
@@ -13,7 +14,6 @@ db.persona.insertMany([
 		"nombre": "Pepito",
 		"apellido": "Perez",
 		"genero": "M",
-		"edad": NumberInt(30),
 		"_class": "co.edu.javeriana.as.personapp.mongo.document.PersonaDocument"
 	},
 	{
