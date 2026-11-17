@@ -1,221 +1,265 @@
-# PersonAPP: arquitectura hexagonal
+# PersonAPP - Arquitectura Hexagonal con Spring Boot
 
-Aplicación de ejemplo para administrar personas, profesiones, teléfonos y
-estudios. Tiene dos entradas independientes: una API REST y una interfaz de
-consola (CLI). Ambas pueden trabajar con MariaDB o MongoDB.
+Laboratorio de Arquitectura de Software. Servicio para administrar personas,
+profesiones, teléfonos y estudios siguiendo arquitectura hexagonal (puertos y
+adaptadores). Tiene dos adaptadores de entrada (API REST y consola) y dos de
+salida (MariaDB y MongoDB); en cada operación se elige con qué base trabajar.
 
-## Módulos
+## Stack
 
-| Módulo | Función |
+| Herramienta | Versión |
 | --- | --- |
-| `domain` | Modelos y reglas del dominio. |
-| `application` | Casos de uso y puertos de entrada y salida. |
-| `common` | Elementos compartidos. |
-| `rest-input-adapter` | API REST y documentación Swagger. |
-| `cli-input-adapter` | Menús de consola. |
-| `maria-output-adapter` | Persistencia en MariaDB. |
-| `mongo-output-adapter` | Persistencia en MongoDB. |
+| JDK | 25 (LTS) |
+| Spring Boot | 4.1.2 |
+| Maven | 3.9.x |
+| MariaDB | 12.3 (LTS) |
+| MongoDB | 9.0 |
+| springdoc-openapi (Swagger / OpenAPI 3) | 3.2.0 |
+| Lombok | 1.18.48 |
+| Docker / Docker Compose | para levantar las bases |
 
-El `pom.xml` raíz agrupa los módulos en un reactor Maven.
+## Estructura del proyecto
 
-## Requisitos
+```
+personapp-hexa-spring-boot
+├── common                 anotaciones (@Port, @UseCase, @Adapter, @Mapper) y excepciones
+├── domain                 entidades de dominio: Person, Profession, Phone, Study
+├── application            puertos de entrada/salida y casos de uso
+├── maria-output-adapter   adaptador de salida JPA para MariaDB
+├── mongo-output-adapter   adaptador de salida Spring Data para MongoDB
+├── rest-input-adapter     API REST + Swagger (puerto 3000)
+├── cli-input-adapter      menú de consola
+├── scripts                DDL y DML de MariaDB y MongoDB
+└── docker-compose.yml     MariaDB y MongoDB con los scripts cargados
+```
 
-- JDK 25 y Maven. El proyecto utiliza Spring Boot 4.1.2 y Lombok.
-- MariaDB y MongoDB. En este laboratorio se probaron MariaDB 12.3 y MongoDB 9.0.
-- Docker Desktop si vas a utilizar los ejemplos con contenedores.
-- En VS Code, extensiones de Java y soporte para Lombok si se utiliza el IDE.
+El flujo es siempre el mismo: el adaptador de entrada (REST o CLI) recibe la
+base elegida (`MARIA` o `MONGO`), crea el caso de uso con el adaptador de salida
+correspondiente y el caso de uso solo conoce el puerto de salida, no la base.
 
-Comprueba en la terminal:
+## Modelo de datos
+
+| Tabla / colección | Campos | Notas |
+| --- | --- | --- |
+| `persona` | `cc` (PK), `nombre`, `apellido`, `genero` (`M`/`F`), `edad` | `edad` es opcional y no puede ser negativa |
+| `profesion` | `id` (PK), `nom`, `des` | `des` es opcional |
+| `telefono` | `num` (PK), `oper`, `duenio` (FK a persona) | |
+| `estudios` | `id_prof` + `cc_per` (PK compuesta), `fecha`, `univer` | FK a profesion y persona |
+
+Al eliminar una persona se eliminan también sus teléfonos y estudios; al
+eliminar una profesión se eliminan los estudios asociados.
+
+## 1. Configurar el ambiente
+
+Se necesita JDK 25, Maven 3.9 y Docker. Verificar con:
 
 ```bash
 java -version
 mvn -version
-docker --version
+docker compose version
 ```
 
-Maven debe indicar que usa Java 25. Si no encuentra `mvn`, agrega el directorio
-`bin` de Maven al `PATH` o invoca directamente `mvn.cmd`. Los comandos Bash y
-PowerShell no son intercambiables.
-
-### Java y Maven en Git Bash
-
-Desde la raíz del proyecto, reemplaza las rutas de ejemplo por las de tu equipo:
+`mvn -version` tiene que mostrar Java 25. Si muestra otra versión, apuntar
+`JAVA_HOME` al JDK 25:
 
 ```bash
-export JAVA_HOME='C:\ruta\al\jdk-25'
-export PATH="$(cygpath -u "$JAVA_HOME\bin"):$PATH"
-MAVEN="$(cygpath -u 'C:\ruta\a\maven\bin\mvn.cmd')"
-"$MAVEN" -version
+# Linux / macOS
+export JAVA_HOME=/ruta/al/jdk-25
+export PATH="$JAVA_HOME/bin:$PATH"
 ```
-
-Los comandos siguientes usan `"$MAVEN"` en Git Bash. Estas variables se deben
-configurar de nuevo cuando se abra otra terminal.
-
-En PowerShell, reemplaza también las rutas de ejemplo:
 
 ```powershell
+# Windows (PowerShell)
 $env:JAVA_HOME = "C:\ruta\al\jdk-25"
 $env:Path = "$env:JAVA_HOME\bin;$env:Path"
-$mvn = "C:\ruta\a\maven\bin\mvn.cmd"
-& $mvn -version
 ```
 
-Para usar los comandos Maven mostrados más abajo en PowerShell, reemplaza
-`"$MAVEN"` por `& $mvn`.
+## 2. Levantar las bases de datos
 
-## Configuración de las bases
-
-Por defecto, ambos adaptadores utilizan la base `persona_db`:
-
-| Motor | Host | Puerto | Usuario de aplicación |
-| --- | --- | --- | --- |
-| MariaDB | `localhost` | `3307` | `persona_db` |
-| MongoDB | `localhost` | `27017` | `persona_db` (autenticación en `admin`) |
-
-Las conexiones se configuran por separado en los archivos
-[REST application.properties](rest-input-adapter/src/main/resources/application.properties)
-y [CLI application.properties](cli-input-adapter/src/main/resources/application.properties).
-Las credenciales incluidas son únicamente para el laboratorio local; no son
-adecuadas para producción. Configura contraseñas seguras externamente y no las
-subas al repositorio para otros entornos.
-
-### Bases existentes de este laboratorio
-
-Si ya existen los contenedores de este equipo, inicia Docker Desktop y, si están
-detenidos, ejecuta:
+Desde la raíz del repositorio:
 
 ```bash
-docker start personapp-lts-mariadb personapp-lts-mongo
-docker ps
+docker compose up -d
+docker compose ps
 ```
 
-No ejecutes los scripts de inicialización sobre estas bases sin revisar sus
-datos. Los contenedores y volúmenes anteriores están detenidos como respaldo;
-no los arranques simultáneamente porque usan los mismos puertos.
+Esto crea los contenedores `personapp-mariadb` (puerto 3307) y
+`personapp-mongo` (puerto 27017). La primera vez que arrancan ejecutan los
+scripts de `scripts/`, que crean el esquema, el usuario de la aplicación
+(`persona_db` / `persona_db`) y cinco registros de ejemplo por entidad. Hay que
+esperar a que ambos aparezcan como `healthy`.
 
-### Crear bases locales nuevas con Docker
+Las contraseñas de root por defecto son `root`; se pueden cambiar con las
+variables `MARIADB_ROOT_PASSWORD`, `MONGO_ROOT_USERNAME` y `MONGO_ROOT_PASSWORD`
+antes del primer `up`.
 
-Esta alternativa es para una instalación **nueva**, con los puertos 3307 y
-27017 libres. No la ejecutes si ya estás usando las bases anteriores en esos
-puertos. Los siguientes comandos son para **Git Bash**:
+Para detenerlas: `docker compose stop`. Para borrarlas con todos sus datos y
+volver a cargar los scripts desde cero: `docker compose down -v`.
+
+### Cargar los scripts manualmente
+
+Si las bases ya existen y no se usa el compose, los scripts se pueden ejecutar
+a mano (primero el DDL y después el DML):
 
 ```bash
-read -rs -p "Contraseña root de MariaDB: " MARIADB_ROOT_PASSWORD; echo
-read -rs -p "Contraseña root de MongoDB: " MONGO_INITDB_ROOT_PASSWORD; echo
-export MARIADB_ROOT_PASSWORD MONGO_INITDB_ROOT_PASSWORD
-export MONGO_INITDB_ROOT_USERNAME=personapp_root
-
-MSYS_NO_PATHCONV=1 docker run -d --name personapp-mariadb -p 127.0.0.1:3307:3306 \
-  -e MARIADB_ROOT_PASSWORD -v personapp-mariadb-data:/var/lib/mysql mariadb:12.3
-MSYS_NO_PATHCONV=1 docker run -d --name personapp-mongo -p 127.0.0.1:27017:27017 \
-  -e MONGO_INITDB_ROOT_USERNAME -e MONGO_INITDB_ROOT_PASSWORD \
-  -v personapp-mongo-data:/data/db mongo:9.0
-unset MARIADB_ROOT_PASSWORD MONGO_INITDB_ROOT_USERNAME MONGO_INITDB_ROOT_PASSWORD
+mariadb -h 127.0.0.1 -P 3307 -u root -p < scripts/persona_ddl_maria.sql
+mariadb -h 127.0.0.1 -P 3307 -u root -p < scripts/persona_dml_maria.sql
+mongosh "mongodb://root:root@localhost:27017/admin" < scripts/persona_ddl_mongo.js
+mongosh "mongodb://root:root@localhost:27017/admin" < scripts/persona_dml_mongo.js
 ```
 
-Espera a que ambos motores terminen de iniciar; consulta `docker ps` y, si es
-necesario, `docker logs personapp-mariadb` y `docker logs personapp-mongo`.
-Los volúmenes conservan los datos cuando se detienen los contenedores.
+Ojo: el DDL de MariaDB borra el esquema `persona_db` si ya existe.
 
-**Solo para bases vacías y de laboratorio**, crea el esquema y el usuario de
-aplicación con estos scripts:
+La conexión de la aplicación está en el `application.properties` de cada
+adaptador de entrada:
+[REST](rest-input-adapter/src/main/resources/application.properties) y
+[CLI](cli-input-adapter/src/main/resources/application.properties).
+
+## 3. Compilar
 
 ```bash
-docker exec -i personapp-mariadb sh -c 'exec mariadb -u root -p"$MARIADB_ROOT_PASSWORD"' < "$(cygpath -u 'scripts\persona_ddl_maria.sql')"
-docker exec -i personapp-mongo sh -c 'exec mongosh --quiet --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin' < "$(cygpath -u 'scripts\persona_ddl_mongo.js')"
+mvn clean package
 ```
 
-**Advertencia:** el DDL de MariaDB elimina el esquema y el usuario
-`persona_db` antes de crearlos. Ambos DDL crean credenciales de laboratorio;
-revísalos y adáptalos antes de usarlos fuera de este entorno.
+Compila todos los módulos, corre las pruebas unitarias y deja los jar
+ejecutables en:
 
-Para cargar los ejemplos en las bases **vacías**, después de los DDL:
+- `rest-input-adapter/target/rest-input-adapter-0.0.1-SNAPSHOT.jar`
+- `cli-input-adapter/target/cli-input-adapter-0.0.1-SNAPSHOT.jar`
+
+Para compilar sin pruebas: `mvn clean package -DskipTests`.
+
+## 4. Desplegar y ejecutar
+
+Con las bases arriba:
+
+**API REST**
 
 ```bash
-docker exec -i personapp-mariadb sh -c 'exec mariadb -u root -p"$MARIADB_ROOT_PASSWORD"' < "$(cygpath -u 'scripts\persona_dml_maria.sql')"
-docker exec -i personapp-mongo sh -c 'exec mongosh --quiet --username "$MONGO_INITDB_ROOT_USERNAME" --password "$MONGO_INITDB_ROOT_PASSWORD" --authenticationDatabase admin' < "$(cygpath -u 'scripts\persona_dml_mongo.js')"
+java -jar rest-input-adapter/target/rest-input-adapter-0.0.1-SNAPSHOT.jar
 ```
 
-Cada DML contiene cinco registros por entidad. No lo ejecutes completo en una
-base con las mismas claves: puede fallar por duplicados o dejar una carga
-parcial. Los ejemplos de fechas Mongo están ajustados a Colombia (UTC-5).
-Spring Data las lee usando la zona horaria del equipo; ajústalas si se utiliza
-otra zona.
+Queda escuchando en `http://localhost:3000`.
 
-## Compilación y pruebas
+- Swagger UI: <http://localhost:3000/swagger-ui.html>
+- OpenAPI (JSON): <http://localhost:3000/api-docs>
 
-Desde la raíz, en Git Bash:
+Si el puerto 3000 está ocupado se puede cambiar al arrancar:
+`java -jar rest-input-adapter/target/rest-input-adapter-0.0.1-SNAPSHOT.jar --server.port=8080`.
+
+**CLI**
 
 ```bash
-"$MAVEN" test
+java -jar cli-input-adapter/target/cli-input-adapter-0.0.1-SNAPSHOT.jar
 ```
 
-Las pruebas de integración opcionales requieren bases de prueba **aisladas** y
-se habilitan con `PERSONAPP_ISOLATED_INTEGRATION_TEST=true` y conexiones
-configuradas explícitamente. Crean y eliminan registros: nunca las habilites
-contra las bases que contienen datos reales.
+El menú pide el módulo (persona, profesión, teléfono o estudio), la base
+(MariaDB o MongoDB) y la operación (listar, buscar, contar, crear, editar o
+eliminar). Los campos opcionales se dejan vacíos con Enter.
 
-Para compilar e instalar los módulos necesarios para REST:
+También se pueden ejecutar sin generar el jar, instalando primero los módulos:
 
 ```bash
-"$MAVEN" -pl rest-input-adapter -am -DskipTests install
+mvn install -DskipTests
+mvn -pl rest-input-adapter spring-boot:run
+mvn -pl cli-input-adapter spring-boot:run
 ```
 
-Para la CLI:
+## Endpoints
+
+`{db}` puede ser `MARIA` o `MONGO`. En los POST la base va en el cuerpo
+(`"database"`); en el resto va en la ruta.
+
+| Método | Ruta | Descripción |
+| --- | --- | --- |
+| GET | `/api/v1/persona/{db}` | Listar personas |
+| GET | `/api/v1/persona/{db}/count` | Contar personas |
+| GET | `/api/v1/persona/{db}/{cc}` | Buscar persona |
+| GET | `/api/v1/persona/{db}/{cc}/telefonos` | Teléfonos de una persona |
+| GET | `/api/v1/persona/{db}/{cc}/estudios` | Estudios de una persona |
+| POST | `/api/v1/persona` | Crear persona |
+| PUT | `/api/v1/persona/{db}/{cc}` | Editar persona |
+| DELETE | `/api/v1/persona/{db}/{cc}` | Eliminar persona |
+| GET | `/api/v1/profesion/{db}` | Listar profesiones |
+| GET | `/api/v1/profesion/{db}/count` | Contar profesiones |
+| GET | `/api/v1/profesion/{db}/{id}` | Buscar profesión |
+| POST | `/api/v1/profesion` | Crear profesión |
+| PUT | `/api/v1/profesion/{db}/{id}` | Editar profesión |
+| DELETE | `/api/v1/profesion/{db}/{id}` | Eliminar profesión |
+| GET | `/api/v1/telefono/{db}` | Listar teléfonos |
+| GET | `/api/v1/telefono/{db}/count` | Contar teléfonos |
+| GET | `/api/v1/telefono/{db}/{num}` | Buscar teléfono |
+| POST | `/api/v1/telefono` | Crear teléfono |
+| PUT | `/api/v1/telefono/{db}/{num}` | Editar teléfono |
+| DELETE | `/api/v1/telefono/{db}/{num}` | Eliminar teléfono |
+| GET | `/api/v1/estudio/{db}` | Listar estudios |
+| GET | `/api/v1/estudio/{db}/count` | Contar estudios |
+| GET | `/api/v1/estudio/{db}/{cc}/{idProf}` | Buscar estudio |
+| POST | `/api/v1/estudio` | Crear estudio |
+| PUT | `/api/v1/estudio/{db}/{cc}/{idProf}` | Editar estudio |
+| DELETE | `/api/v1/estudio/{db}/{cc}/{idProf}` | Eliminar estudio |
+
+Códigos de respuesta: `200` consulta/edición/eliminación correcta, `201`
+creación, `400` datos inválidos, `404` no existe el registro, `409` registro
+duplicado o conflicto con datos relacionados.
+
+### Ejemplos
 
 ```bash
-"$MAVEN" -pl cli-input-adapter -am -DskipTests install
+# crear una persona en MariaDB (edad es opcional)
+curl -X POST http://localhost:3000/api/v1/persona -H 'Content-Type: application/json' \
+  -d '{"dni":"1010","firstName":"Laura","lastName":"Rojas","age":"22","sex":"F","database":"MARIA"}'
+
+# crear una profesión en MongoDB
+curl -X POST http://localhost:3000/api/v1/profesion -H 'Content-Type: application/json' \
+  -d '{"id":6,"name":"Arquitectura","description":"Diseno de edificaciones","database":"MONGO"}'
+
+# crear un teléfono (el dueño debe existir en la misma base)
+curl -X POST http://localhost:3000/api/v1/telefono -H 'Content-Type: application/json' \
+  -d '{"number":"3101234567","company":"Claro","ownerIdentification":1010,"database":"MARIA"}'
+
+# crear un estudio (persona y profesión deben existir)
+curl -X POST http://localhost:3000/api/v1/estudio -H 'Content-Type: application/json' \
+  -d '{"personIdentification":1010,"professionIdentification":1,"graduationDate":"2024-06-14","universityName":"Javeriana","database":"MARIA"}'
+
+# editar una persona
+curl -X PUT http://localhost:3000/api/v1/persona/MARIA/1010 -H 'Content-Type: application/json' \
+  -d '{"firstName":"Laura","lastName":"Rojas","age":"23","sex":"F"}'
+
+# consultar sus teléfonos y eliminarla
+curl http://localhost:3000/api/v1/persona/MARIA/1010/telefonos
+curl -X DELETE http://localhost:3000/api/v1/persona/MARIA/1010
 ```
 
-Espera a que el comando correspondiente termine con `BUILD SUCCESS`. Instalar
-los módulos en el repositorio local de Maven permite resolver las dependencias
-entre módulos al ejecutar cada adaptador por separado.
+## Scripts
 
-## Despliegue y ejecución local
+| Archivo | Contenido |
+| --- | --- |
+| `scripts/persona_ddl_maria.sql` | Esquema `persona_db`, usuario de la aplicación y tablas con sus llaves |
+| `scripts/persona_dml_maria.sql` | 5 registros por tabla |
+| `scripts/persona_ddl_mongo.js` | Usuario de la aplicación y validador de la colección `persona` |
+| `scripts/persona_dml_mongo.js` | 5 documentos por colección |
 
-Enciende ambas bases y ejecuta estos comandos desde la raíz, en Git Bash, después
-de instalar los módulos correspondientes:
-
-**API REST:**
+## Pruebas
 
 ```bash
-"$MAVEN" -pl rest-input-adapter spring-boot:run
+mvn test
 ```
 
-Deja la terminal abierta. La API escucha en `http://localhost:3000`. Abre
-[Swagger UI](http://localhost:3000/swagger-ui.html) para consultar y probar
-los endpoints; la definición OpenAPI está en
-[`/api-docs`](http://localhost:3000/api-docs).
-
-**CLI:** abre otra terminal, configura de nuevo Java y Maven como se indicó
-arriba y ejecuta:
-
-```bash
-"$MAVEN" -pl cli-input-adapter spring-boot:run
-```
-
-El menú aparece en esa terminal. Para detener cualquiera de las aplicaciones,
-pulsa `Ctrl+C` en su terminal. REST y CLI son aplicaciones Spring diferentes.
-
-En este equipo existe una configuración local **PersonAPP REST (3000)** en
-Ejecutar y depurar. La carpeta `.vscode` está excluida del repositorio, por lo
-que otros equipos deben crear su propia configuración. Si el depurador señala
-problemas de compilación, revisa sus mensajes y verifica el resultado de Maven.
-
-El repositorio no incluye Dockerfile ni una configuración de despliegue de
-producción; los pasos anteriores describen la ejecución local.
+Las pruebas unitarias no necesitan bases de datos. Hay además pruebas de
+integración (`IsolatedPersistenceIntegrationTest`, `IsolatedCliIntegrationTest`)
+que crean y borran registros reales; solo se ejecutan si se define
+`PERSONAPP_ISOLATED_INTEGRATION_TEST=true` y se apuntan a bases de prueba en
+puertos distintos a los de desarrollo (ver las validaciones en cada clase).
 
 ## Problemas frecuentes
 
-- **Versión de Java incorrecta:** revisa tanto `java -version` como
-  `"$MAVEN" -version` y configura `JAVA_HOME` con el JDK 25.
-- **Error de conexión:** verifica que ambos motores estén activos, sus puertos,
-  credenciales y las propiedades de los adaptadores.
-- **Puerto 3000 ocupado:** detén únicamente la instancia anterior de la API o
-  cambia `server.port` en la configuración REST.
-- **Swagger no muestra la definición:** prueba una recarga forzada del navegador
-  (`Ctrl+Shift+R`) o una ventana privada para descartar recursos en caché.
-- **Claves duplicadas al cargar DML:** revisa los registros existentes; no
-  ejecutes el DDL destructivo como solución automática.
-
-Este repositorio es una plantilla de laboratorio de arquitectura limpia.
+- **`release version 25 not supported`**: Maven está usando otro JDK; revisar
+  `JAVA_HOME` y `mvn -version`.
+- **`Connection refused` al iniciar**: las bases no están arriba o no han
+  terminado de iniciar; revisar `docker compose ps`.
+- **Los scripts no se ejecutaron**: solo corren la primera vez que se crea el
+  volumen. Usar `docker compose down -v` y volver a levantar.
+- **Puerto 3307 o 27017 ocupado**: detener la otra instancia o cambiar el
+  puerto del lado izquierdo en `docker-compose.yml` y en los
+  `application.properties`.
