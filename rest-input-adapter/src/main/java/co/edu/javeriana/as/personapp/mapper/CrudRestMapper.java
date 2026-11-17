@@ -3,24 +3,17 @@ package co.edu.javeriana.as.personapp.mapper;
 import co.edu.javeriana.as.personapp.common.annotations.Mapper;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
-import co.edu.javeriana.as.personapp.domain.Gender;
 import co.edu.javeriana.as.personapp.domain.Profession;
 import co.edu.javeriana.as.personapp.domain.Study;
 import co.edu.javeriana.as.personapp.model.request.EstudioRequest;
 import co.edu.javeriana.as.personapp.model.request.ProfesionRequest;
 import co.edu.javeriana.as.personapp.model.request.TelefonoRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
-import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
 import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 
 @Mapper
 public class CrudRestMapper {
-	public PersonaResponse toResponse(Person person, String database) {
-		return new PersonaResponse(String.valueOf(person.getIdentification()), person.getFirstName(), person.getLastName(),
-				String.valueOf(person.getAge()), person.getGender() == Gender.FEMALE ? "F" : "M", database, "OK");
-	}
-
 	public Profession toDomain(ProfesionRequest request) {
 		if (request.getId() == null || request.getName() == null || request.getName().trim().isEmpty()) {
 			throw new IllegalArgumentException("Profession id and name are required");
