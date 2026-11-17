@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>co.edu.javeriana.as</groupId>
 	<artifactId>personapp-hexa-spring-boot</artifactId>
-	<version>${revision}</version>
+	<version>0.0.1-SNAPSHOT</version>
 	<name>PersonAPP</name>
 	<description>App Hexagonal (Clean Architecture) Multi Module PersonAPP</description>
 	<packaging>pom</packaging>
@@ -15,7 +15,6 @@
 		<java.version>${global.java.version}</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-		<revision>0.0.1-SNAPSHOT</revision>
 		<global.java.version>25</global.java.version>
 		<global.springframework.boot.version>4.1.2</global.springframework.boot.version>
 		<lombok.version>1.18.48</lombok.version>
@@ -91,7 +90,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-surefire-plugin</artifactId>
-				<version>3.5.4</version>
+				<version>3.6.1</version>
 			</plugin>
 		</plugins>
 	</build>

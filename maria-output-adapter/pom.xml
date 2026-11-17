@@ -15,7 +15,7 @@
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>application</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>

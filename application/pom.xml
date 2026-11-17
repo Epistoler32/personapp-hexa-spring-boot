@@ -15,12 +15,12 @@
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>domain</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>common</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
 </project>

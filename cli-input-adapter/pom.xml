@@ -15,17 +15,17 @@
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>application</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>maria-output-adapter</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>co.edu.javeriana.as.personapp</groupId>
 			<artifactId>mongo-output-adapter</artifactId>
-			<version>${revision}</version>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
