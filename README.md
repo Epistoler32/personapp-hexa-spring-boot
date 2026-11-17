@@ -154,8 +154,11 @@ java -jar cli-input-adapter/target/cli-input-adapter-0.0.1-SNAPSHOT.jar
 ```
 
 El menú pide el módulo (persona, profesión, teléfono o estudio), la base
-(MariaDB o MongoDB) y la operación (listar, buscar, contar, crear, editar o
-eliminar). Los campos opcionales se dejan vacíos con Enter.
+(MariaDB o MongoDB) y la operación (listar, buscar, contar, crear, editar,
+eliminar o ver relaciones). La opción de relaciones muestra, según el módulo,
+los teléfonos, estudios y profesiones de una persona, los estudios de una
+profesión, el dueño de un teléfono o la persona y profesión de un estudio. Los
+campos opcionales se dejan vacíos con Enter.
 
 También se pueden ejecutar sin generar el jar, instalando primero los módulos:
 
@@ -177,18 +180,21 @@ mvn -pl cli-input-adapter spring-boot:run
 | GET | `/api/v1/persona/{db}/{cc}` | Buscar persona |
 | GET | `/api/v1/persona/{db}/{cc}/telefonos` | Teléfonos de una persona |
 | GET | `/api/v1/persona/{db}/{cc}/estudios` | Estudios de una persona |
+| GET | `/api/v1/persona/{db}/{cc}/profesiones` | Profesiones que estudió una persona |
 | POST | `/api/v1/persona` | Crear persona |
 | PUT | `/api/v1/persona/{db}/{cc}` | Editar persona |
 | DELETE | `/api/v1/persona/{db}/{cc}` | Eliminar persona |
 | GET | `/api/v1/profesion/{db}` | Listar profesiones |
 | GET | `/api/v1/profesion/{db}/count` | Contar profesiones |
 | GET | `/api/v1/profesion/{db}/{id}` | Buscar profesión |
+| GET | `/api/v1/profesion/{db}/{id}/estudios` | Estudios de una profesión |
 | POST | `/api/v1/profesion` | Crear profesión |
 | PUT | `/api/v1/profesion/{db}/{id}` | Editar profesión |
 | DELETE | `/api/v1/profesion/{db}/{id}` | Eliminar profesión |
 | GET | `/api/v1/telefono/{db}` | Listar teléfonos |
 | GET | `/api/v1/telefono/{db}/count` | Contar teléfonos |
 | GET | `/api/v1/telefono/{db}/{num}` | Buscar teléfono |
+| GET | `/api/v1/telefono/{db}/{num}/duenio` | Dueño de un teléfono |
 | POST | `/api/v1/telefono` | Crear teléfono |
 | PUT | `/api/v1/telefono/{db}/{num}` | Editar teléfono |
 | DELETE | `/api/v1/telefono/{db}/{num}` | Eliminar teléfono |
@@ -226,8 +232,9 @@ curl -X POST http://localhost:3000/api/v1/estudio -H 'Content-Type: application/
 curl -X PUT http://localhost:3000/api/v1/persona/MARIA/1010 -H 'Content-Type: application/json' \
   -d '{"firstName":"Laura","lastName":"Rojas","age":"23","sex":"F"}'
 
-# consultar sus teléfonos y eliminarla
+# consultar sus teléfonos y profesiones, y eliminarla
 curl http://localhost:3000/api/v1/persona/MARIA/1010/telefonos
+curl http://localhost:3000/api/v1/persona/MARIA/1010/profesiones
 curl -X DELETE http://localhost:3000/api/v1/persona/MARIA/1010
 ```
 

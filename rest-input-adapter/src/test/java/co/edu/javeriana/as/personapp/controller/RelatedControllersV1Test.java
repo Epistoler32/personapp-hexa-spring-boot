@@ -3,12 +3,15 @@ package co.edu.javeriana.as.personapp.controller;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import java.util.Collections;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,7 @@ import co.edu.javeriana.as.personapp.model.request.EstudioRequest;
 import co.edu.javeriana.as.personapp.model.request.ProfesionRequest;
 import co.edu.javeriana.as.personapp.model.request.TelefonoRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
+import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
 import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 
@@ -101,5 +105,18 @@ class RelatedControllersV1Test {
 		studyMvc.perform(put("/api/v1/estudio/MARIA/1/7").contentType("application/json")
 				.content("{\"universityName\":\"Uni\"}")).andExpect(status().isOk());
 		studyMvc.perform(delete("/api/v1/estudio/MARIA/1/7")).andExpect(status().isOk());
+	}
+
+	@Test
+	void exposesStudiesOfAProfessionAndOwnerOfAPhone() throws Exception {
+		when(adapter.estudiosProfesion("MONGO", 7)).thenReturn(Collections.singletonList(
+				new EstudioResponse(1, 7, null, "Uni", "MongoDB", "OK")));
+		when(adapter.duenioTelefono("MONGO", "555")).thenReturn(
+				new PersonaResponse("1", "Ana", "Perez", null, "F", "MongoDB", "OK"));
+
+		professionMvc.perform(get("/api/v1/profesion/MONGO/7/estudios")).andExpect(status().isOk());
+		phoneMvc.perform(get("/api/v1/telefono/MONGO/555/duenio")).andExpect(status().isOk());
+		verify(adapter).estudiosProfesion("MONGO", 7);
+		verify(adapter).duenioTelefono("MONGO", "555");
 	}
 }

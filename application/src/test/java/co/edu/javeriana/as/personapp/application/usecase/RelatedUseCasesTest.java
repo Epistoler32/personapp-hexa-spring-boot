@@ -12,6 +12,7 @@ import co.edu.javeriana.as.personapp.application.port.out.PhoneOutputPort;
 import co.edu.javeriana.as.personapp.application.port.out.ProfessionOutputPort;
 import co.edu.javeriana.as.personapp.application.port.out.StudyOutputPort;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
+import co.edu.javeriana.as.personapp.domain.Gender;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
 import co.edu.javeriana.as.personapp.domain.Profession;
@@ -64,6 +65,22 @@ class RelatedUseCasesTest {
 		assertEquals(1, useCase.count());
 		assertEquals(study, useCase.edit(1, 7, study));
 		assertEquals(true, useCase.drop(1, 7));
+	}
+
+	@Test
+	void exposesStudiesOfAProfessionAndOwnerOfAPhone() throws Exception {
+		Person owner = new Person(1, "Ana", "Perez", Gender.FEMALE);
+		Profession profession = new Profession(7, "Engineer", null, null);
+		profession.setStudies(Arrays.asList(new Study(owner, profession, null, "Uni")));
+		InMemoryProfessionOutput professions = new InMemoryProfessionOutput();
+		professions.save(profession);
+		InMemoryPhoneOutput phones = new InMemoryPhoneOutput();
+		phones.save(new Phone("555", "Telco", owner));
+
+		assertEquals(1, new ProfessionUseCase(professions).getStudies(7).size());
+		assertEquals("Ana", new PhoneUseCase(phones).getOwner("555").getFirstName());
+		assertThrows(NoExistException.class, () -> new ProfessionUseCase(professions).getStudies(8));
+		assertThrows(NoExistException.class, () -> new PhoneUseCase(phones).getOwner("999"));
 	}
 
 	@Test

@@ -47,7 +47,7 @@ public class CrudMenu {
 		}
 		boolean back = false;
 		while (!back) {
-			System.out.println("\n1 Listar  2 Buscar  3 Contar  4 Crear  5 Editar  6 Eliminar  0 Volver");
+			System.out.println("\n1 Listar  2 Buscar  3 Contar  4 Crear  5 Editar  6 Eliminar  7 Relaciones  0 Volver");
 			int operation = readInt(input, "Operacion: ");
 			try {
 				switch (operation) {
@@ -58,6 +58,7 @@ public class CrudMenu {
 				case 4: create(input, database, entity); break;
 				case 5: update(input, database, entity); break;
 				case 6: delete(input, database, entity); break;
+				case 7: relations(input, database, entity); break;
 				default: System.out.println("Opcion invalida");
 				}
 			} catch (NoExistException exception) {
@@ -142,6 +143,41 @@ public class CrudMenu {
 				readInt(input, "Id profesion: "));
 		}
 		System.out.println(deleted ? "Eliminado" : "No se pudo eliminar");
+	}
+
+	private void relations(Scanner input, String database, int entity) throws NoExistException {
+		switch (entity) {
+		case 1: {
+			Integer id = readInt(input, "Identificacion: ");
+			System.out.println("Telefonos:");
+			print(adapter.person(database).getPhones(id));
+			System.out.println("Estudios:");
+			print(adapter.person(database).getStudies(id));
+			System.out.println("Profesiones:");
+			print(adapter.person(database).getProfessions(id));
+			break;
+		}
+		case 2:
+		{
+			List<Study> studies = adapter.profession(database).getStudies(readInt(input, "Id profesion: "));
+			System.out.println("Estudios:");
+			print(studies);
+			break;
+		}
+		case 3: {
+			Person owner = adapter.phone(database).getOwner(readText(input, "Numero: "));
+			System.out.print("Duenio: ");
+			show(owner);
+			break;
+		}
+		default: {
+			Study study = adapter.study(database).findOne(readInt(input, "Id persona: "), readInt(input, "Id profesion: "));
+			System.out.print("Persona: ");
+			show(study.getPerson());
+			System.out.print("Profesion: ");
+			show(study.getProfession());
+		}
+		}
 	}
 
 	private Person readPerson(Scanner input, Integer existingId) {

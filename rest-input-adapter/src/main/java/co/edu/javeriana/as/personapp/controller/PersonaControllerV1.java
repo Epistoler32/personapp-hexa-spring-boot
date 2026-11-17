@@ -21,6 +21,7 @@ import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
 import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
+import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 import lombok.extern.slf4j.Slf4j;
 import io.swagger.v3.oas.annotations.Operation;
@@ -66,6 +67,13 @@ public class PersonaControllerV1 {
 	public List<EstudioResponse> estudios(@PathVariable("database") String database,
 			@PathVariable("identification") Integer identification) throws NoExistException {
 		return personaInputAdapterRest.estudiosPersona(database, identification);
+	}
+
+	@GetMapping(path = "/{database}/{identification}/profesiones", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "List the professions studied by a person")
+	public List<ProfesionResponse> profesiones(@PathVariable("database") String database,
+			@PathVariable("identification") Integer identification) throws NoExistException {
+		return personaInputAdapterRest.profesionesPersona(database, identification);
 	}
 	
 	@ResponseBody

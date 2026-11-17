@@ -23,6 +23,7 @@ import co.edu.javeriana.as.personapp.adapter.PersonaInputAdapterRest;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
 import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
+import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 
 class PersonaControllerV1Test {
@@ -75,5 +76,9 @@ class PersonaControllerV1Test {
 				.andExpect(jsonPath("$[0].number").value("3001234567"));
 		mvc.perform(get("/api/v1/persona/MARIA/12/estudios")).andExpect(status().isOk())
 				.andExpect(jsonPath("$[0].universityName").value("Javeriana"));
+		when(adapter.profesionesPersona("MARIA", 12)).thenReturn(Collections.singletonList(
+				new ProfesionResponse(1, "Medicina", null, "MariaDB", "OK")));
+		mvc.perform(get("/api/v1/persona/MARIA/12/profesiones")).andExpect(status().isOk())
+				.andExpect(jsonPath("$[0].name").value("Medicina"));
 	}
 }

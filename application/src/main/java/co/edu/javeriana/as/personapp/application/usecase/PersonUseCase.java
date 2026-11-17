@@ -1,6 +1,8 @@
 package co.edu.javeriana.as.personapp.application.usecase;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -11,6 +13,7 @@ import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.common.exceptions.AlreadyExistsException;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
+import co.edu.javeriana.as.personapp.domain.Profession;
 import co.edu.javeriana.as.personapp.domain.Study;
 import lombok.extern.slf4j.Slf4j;
 
@@ -87,7 +90,7 @@ public class PersonUseCase implements PersonInputPort {
 	public List<Phone> getPhones(Integer identification) throws NoExistException {
 		Person oldPerson = personPersintence.findById(identification);
 		if (oldPerson != null)
-			return oldPerson.getPhoneNumbers();
+			return oldPerson.getPhoneNumbers() == null ? Collections.emptyList() : oldPerson.getPhoneNumbers();
 		throw new NoExistException(
 				"The person with id " + identification + " does not exist into db, cannot be getting phones");
 	}
@@ -96,8 +99,13 @@ public class PersonUseCase implements PersonInputPort {
 	public List<Study> getStudies(Integer identification) throws NoExistException {
 		Person oldPerson = personPersintence.findById(identification);
 		if (oldPerson != null)
-			return oldPerson.getStudies();
+			return oldPerson.getStudies() == null ? Collections.emptyList() : oldPerson.getStudies();
 		throw new NoExistException(
 				"The person with id " + identification + " does not exist into db, cannot be getting studies");
+	}
+
+	@Override
+	public List<Profession> getProfessions(Integer identification) throws NoExistException {
+		return getStudies(identification).stream().map(Study::getProfession).collect(Collectors.toList());
 	}
 }

@@ -9,6 +9,7 @@ import co.edu.javeriana.as.personapp.application.port.out.PhoneOutputPort;
 import co.edu.javeriana.as.personapp.common.annotations.UseCase;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.common.exceptions.AlreadyExistsException;
+import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
 
 @UseCase
@@ -63,6 +64,11 @@ public class PhoneUseCase implements PhoneInputPort {
 	@Override
 	public Integer count() {
 		return output.count();
+	}
+
+	@Override
+	public Person getOwner(String number) throws NoExistException {
+		return findOne(number).getOwner();
 	}
 
 	private void validate(Phone phone) {

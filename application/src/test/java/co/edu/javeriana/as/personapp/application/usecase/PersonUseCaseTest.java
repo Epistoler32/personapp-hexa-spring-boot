@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -13,6 +14,8 @@ import co.edu.javeriana.as.personapp.application.port.out.PersonOutputPort;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.domain.Gender;
 import co.edu.javeriana.as.personapp.domain.Person;
+import co.edu.javeriana.as.personapp.domain.Profession;
+import co.edu.javeriana.as.personapp.domain.Study;
 
 class PersonUseCaseTest {
 	@Test
@@ -39,6 +42,21 @@ class PersonUseCaseTest {
 		PersonUseCase useCase = new PersonUseCase(new InMemoryPersonOutput());
 		assertNull(useCase.create(person(1, "Ana", null)).getAge());
 		assertThrows(IllegalArgumentException.class, () -> useCase.create(person(2, "Ana", -1)));
+	}
+
+	@Test
+	void listsPhonesStudiesAndProfessionsOfAPerson() throws Exception {
+		InMemoryPersonOutput output = new InMemoryPersonOutput();
+		PersonUseCase useCase = new PersonUseCase(output);
+		Person person = person(1, "Ana");
+		Profession profession = new Profession(7, "Medicina", null, null);
+		person.setStudies(Arrays.asList(new Study(person, profession, null, "Javeriana")));
+		output.save(person);
+
+		assertEquals(0, useCase.getPhones(1).size());
+		assertEquals(1, useCase.getStudies(1).size());
+		assertEquals("Medicina", useCase.getProfessions(1).get(0).getName());
+		assertThrows(NoExistException.class, () -> useCase.getProfessions(2));
 	}
 
 	@Test

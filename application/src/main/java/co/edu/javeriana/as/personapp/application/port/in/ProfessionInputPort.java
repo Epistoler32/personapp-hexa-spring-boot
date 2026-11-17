@@ -5,6 +5,7 @@ import java.util.List;
 import co.edu.javeriana.as.personapp.common.annotations.Port;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.domain.Profession;
+import co.edu.javeriana.as.personapp.domain.Study;
 
 @Port
 public interface ProfessionInputPort {
@@ -14,4 +15,5 @@ public interface ProfessionInputPort {
 	List<Profession> findAll();
 	Profession findOne(Integer identification) throws NoExistException;
 	Integer count();
+	List<Study> getStudies(Integer identification) throws NoExistException;
 }

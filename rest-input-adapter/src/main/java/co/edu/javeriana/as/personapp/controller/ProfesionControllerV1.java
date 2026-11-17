@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import co.edu.javeriana.as.personapp.adapter.CrudInputAdapterRest;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.model.request.ProfesionRequest;
+import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
 import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -38,6 +39,13 @@ public class ProfesionControllerV1 {
 	@Operation(summary = "Find a profession by id")
 	public ProfesionResponse one(@PathVariable("database") String database, @PathVariable("id") Integer id) throws NoExistException {
 		return adapter.buscarProfesion(database, id);
+	}
+
+	@GetMapping(path = "/{database}/{id}/estudios", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "List the studies of a profession")
+	public List<EstudioResponse> estudios(@PathVariable("database") String database, @PathVariable("id") Integer id)
+			throws NoExistException {
+		return adapter.estudiosProfesion(database, id);
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)

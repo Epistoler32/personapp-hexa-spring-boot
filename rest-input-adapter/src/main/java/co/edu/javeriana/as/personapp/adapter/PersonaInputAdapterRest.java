@@ -13,6 +13,7 @@ import co.edu.javeriana.as.personapp.mapper.PersonaMapperRest;
 import co.edu.javeriana.as.personapp.model.request.PersonaRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
 import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
+import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 import lombok.extern.slf4j.Slf4j;
 
@@ -47,6 +48,13 @@ public class PersonaInputAdapterRest {
 		String label = useCases.databaseLabel(database);
 		return useCases.person(database).getStudies(identification).stream()
 				.map(study -> crudMapper.toResponse(study, label))
+				.collect(Collectors.toList());
+	}
+
+	public List<ProfesionResponse> profesionesPersona(String database, Integer identification) throws NoExistException {
+		String label = useCases.databaseLabel(database);
+		return useCases.person(database).getProfessions(identification).stream()
+				.map(profession -> crudMapper.toResponse(profession, label))
 				.collect(Collectors.toList());
 	}
 

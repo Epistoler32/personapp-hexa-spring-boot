@@ -6,6 +6,7 @@ import co.edu.javeriana.as.personapp.common.annotations.Port;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.domain.Person;
 import co.edu.javeriana.as.personapp.domain.Phone;
+import co.edu.javeriana.as.personapp.domain.Profession;
 import co.edu.javeriana.as.personapp.domain.Study;
 
 @Port
@@ -26,4 +27,6 @@ public interface PersonInputPort {
 	public List<Phone> getPhones(Integer identification) throws NoExistException;
 
 	public List<Study> getStudies(Integer identification) throws NoExistException;
+
+	public List<Profession> getProfessions(Integer identification) throws NoExistException;
 }

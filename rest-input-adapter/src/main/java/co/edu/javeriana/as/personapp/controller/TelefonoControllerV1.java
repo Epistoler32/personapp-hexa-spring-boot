@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import co.edu.javeriana.as.personapp.adapter.CrudInputAdapterRest;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.model.request.TelefonoRequest;
+import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 import io.swagger.v3.oas.annotations.Operation;
 
@@ -38,6 +39,13 @@ public class TelefonoControllerV1 {
 	@Operation(summary = "Find a phone by number")
 	public TelefonoResponse one(@PathVariable("database") String database, @PathVariable("number") String number) throws NoExistException {
 		return adapter.buscarTelefono(database, number);
+	}
+
+	@GetMapping(path = "/{database}/{number}/duenio", produces = MediaType.APPLICATION_JSON_VALUE)
+	@Operation(summary = "Find the owner of a phone")
+	public PersonaResponse duenio(@PathVariable("database") String database, @PathVariable("number") String number)
+			throws NoExistException {
+		return adapter.duenioTelefono(database, number);
 	}
 
 	@ResponseStatus(HttpStatus.CREATED)

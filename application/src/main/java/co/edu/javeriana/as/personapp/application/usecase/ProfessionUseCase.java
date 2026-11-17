@@ -1,5 +1,6 @@
 package co.edu.javeriana.as.personapp.application.usecase;
 
+import java.util.Collections;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -10,6 +11,7 @@ import co.edu.javeriana.as.personapp.common.annotations.UseCase;
 import co.edu.javeriana.as.personapp.common.exceptions.NoExistException;
 import co.edu.javeriana.as.personapp.common.exceptions.AlreadyExistsException;
 import co.edu.javeriana.as.personapp.domain.Profession;
+import co.edu.javeriana.as.personapp.domain.Study;
 
 @UseCase
 public class ProfessionUseCase implements ProfessionInputPort {
@@ -63,6 +65,12 @@ public class ProfessionUseCase implements ProfessionInputPort {
 	@Override
 	public Integer count() {
 		return output.count();
+	}
+
+	@Override
+	public List<Study> getStudies(Integer identification) throws NoExistException {
+		List<Study> studies = findOne(identification).getStudies();
+		return studies == null ? Collections.emptyList() : studies;
 	}
 
 	private void validate(Profession profession) {

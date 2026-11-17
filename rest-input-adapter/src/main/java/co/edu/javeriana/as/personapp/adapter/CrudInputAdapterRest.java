@@ -11,10 +11,12 @@ import co.edu.javeriana.as.personapp.domain.Phone;
 import co.edu.javeriana.as.personapp.domain.Profession;
 import co.edu.javeriana.as.personapp.domain.Study;
 import co.edu.javeriana.as.personapp.mapper.CrudRestMapper;
+import co.edu.javeriana.as.personapp.mapper.PersonaMapperRest;
 import co.edu.javeriana.as.personapp.model.request.EstudioRequest;
 import co.edu.javeriana.as.personapp.model.request.ProfesionRequest;
 import co.edu.javeriana.as.personapp.model.request.TelefonoRequest;
 import co.edu.javeriana.as.personapp.model.response.EstudioResponse;
+import co.edu.javeriana.as.personapp.model.response.PersonaResponse;
 import co.edu.javeriana.as.personapp.model.response.ProfesionResponse;
 import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 
@@ -22,6 +24,7 @@ import co.edu.javeriana.as.personapp.model.response.TelefonoResponse;
 public class CrudInputAdapterRest {
 	@Autowired private RestUseCaseFactory useCases;
 	@Autowired private CrudRestMapper mapper;
+	@Autowired private PersonaMapperRest personaMapper;
 
 	public List<ProfesionResponse> profesiones(String database) {
 		String label = useCases.databaseLabel(database);
@@ -31,6 +34,12 @@ public class CrudInputAdapterRest {
 
 	public ProfesionResponse buscarProfesion(String database, Integer id) throws NoExistException {
 		return mapper.toResponse(useCases.profession(database).findOne(id), useCases.databaseLabel(database));
+	}
+
+	public List<EstudioResponse> estudiosProfesion(String database, Integer id) throws NoExistException {
+		String label = useCases.databaseLabel(database);
+		return useCases.profession(database).getStudies(id).stream()
+				.map(study -> mapper.toResponse(study, label)).collect(Collectors.toList());
 	}
 
 	public Integer contarProfesiones(String database) {
@@ -64,6 +73,11 @@ public class CrudInputAdapterRest {
 
 	public TelefonoResponse buscarTelefono(String database, String number) throws NoExistException {
 		return mapper.toResponse(useCases.phone(database).findOne(number), useCases.databaseLabel(database));
+	}
+
+	public PersonaResponse duenioTelefono(String database, String number) throws NoExistException {
+		return personaMapper.fromDomainToAdapterRest(useCases.phone(database).getOwner(number),
+				useCases.databaseLabel(database));
 	}
 
 	public Integer contarTelefonos(String database) {
